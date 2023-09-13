@@ -27,22 +27,21 @@ typedef struct
 // typedef for doctor
 typedef struct
 {
-	char username[50];
-	char password[50];
-	char doctor_id[30];
+	char d_name[50];
+	char d_password[50];
+	char d_ic[30];
+	char d_contactnum[30];
 }DOCTOR;
 
 // Doctor login interface functions
 void doctor_login_interface(DOCTOR d[], int* id_ptr);
 int doctor_login(DOCTOR d[], int* i_ptr);
 void doctor_signup(DOCTOR d[]);
-bool doctor_check_number(string str);
 
 // Patients login interface functions
 void user_login_interface(USER c[], int* id_ptr);
 int user_login(USER c[], int* i_ptr);
 void user_signup(USER c[]);
-bool user_check_number(string str);
 
 // Doctor main menu functions
 void doctor_mainmenu(USER c[], int id);
@@ -60,6 +59,8 @@ int faq(USER c[], int id);
 // Function used to logout of the account
 void exit();
 
+//Check input is number or no
+bool check_number(string str);
 
 
 // main function
@@ -79,13 +80,13 @@ int main()
 	ifstream phonenum_file("userphone.txt", ios::in);
 	ifstream stats_file("status.txt", ios::in);
 
-	//// Open input files (doctor)
-	//ifstream name_file("d_username.txt");
-	//ifstream pass_file("d_password.txt");
-	//ifstream ic_file("d_ic.txt");
-	//ifstream phonenum_file("d_phone.txt");
+	// Open input files (doctor)
+	ifstream doc_name_file("d_username.txt", ios::in);
+	ifstream doc_pass_file("d_password.txt", ios::in);
+	ifstream doc_ic_file("d_ic.txt", ios::in);
+	ifstream doc_phonenum_file("d_phone.txt", ios::in);
 
-	// Check if file opening was successful
+	// Check if file opening was successful (patient)
 	if (!name_file)
 		cout << "Error opening username file\n";
 	else if (!pass_file)
@@ -106,6 +107,33 @@ int main()
 			ic_file >> c[i].ic;
 			phonenum_file >> c[i].contactnum;
 			stats_file >> c[i].status;
+		}
+		// Close input files
+		name_file.close();
+		pass_file.close();
+		ic_file.close();
+		phonenum_file.close();
+		stats_file.close();
+	}
+
+	// Check if file opening was successful (doctor)
+	if (!doc_name_file)
+		cout << "Error opening doctor name file\n";
+	else if (!doc_pass_file)
+		cout << "Error opening doctor password file\n";
+	else if (!doc_ic_file)
+		cout << "Error opening doctor ic file\n";
+	else if (!doc_phonenum_file)
+		cout << "Error opening doctor phone number file\n";
+	else
+	{
+		// Read data from input files into the CLIENT array
+		for (int i = 0; i < 50; i++)
+		{
+			doc_name_file >> d[i].d_name;
+			doc_pass_file >> d[i].d_password;
+			doc_ic_file >> d[i].d_ic;
+			doc_phonenum_file >> d[i].d_contactnum;
 		}
 		// Close input files
 		name_file.close();
@@ -249,42 +277,13 @@ void user_signup(USER c[])
 	cout << "Please enter your name: ";
 	getline(cin >> ws, name);
 
-	// Get user's age
-	cout << "Please enter your age: ";
-	do
-	{
-		cin >> age;
-		// Validate if age is a number
-		bool validate = user_check_number(age);
-		if (validate == true)
-		{
-			// Check if age is within valid range (12 to 110)
-			if ((atoi(age.c_str()) <= 110) && (atoi(age.c_str()) >= 12))
-			{
-				validrange = true;
-			}
-			else
-			{
-				validrange = false;
-			}
-		}
-		else
-		{
-			cout << "Invalid input" << endl;
-		}
-
-		if (validate == false || validrange == false)
-			cout << "Please enter your age again: ";
-
-	} while (validate == false || validrange == false);
-
 	// Get user's IC number
 	cout << "Please enter your ic number without '-' (0123456789012): ";
 	do
 	{
 		cin >> ic;
 		// Validate if IC number is a number
-		bool validateic = user_check_number(ic);
+		bool validateic = check_number(ic);
 		if (validateic == true)
 		{
 			char icarray[30];
@@ -316,7 +315,7 @@ void user_signup(USER c[])
 	{
 		cin >> contact_num;
 		// Validate if contact number is a number
-		bool validate2 = user_check_number(contact_num);
+		bool validate2 = check_number(contact_num);
 		char contactnumarray[30];
 		strcpy(contactnumarray, contact_num.c_str());
 		phone_len = strlen(contactnumarray);
@@ -462,6 +461,323 @@ int user_resetpwd(USER c[], int* i_ptr)
 	}
 	return 0;
 }
+
+//// doctor login function definitions
+//void user_login_interface(USER c[], int* id_ptr)
+//{
+//	char interfaceAns;
+//	do
+//	{
+//		cout << "Do you want to <L>ogin or <S>ign up or <R>eset password? >>> ";
+//		cin >> interfaceAns;
+//		interfaceAns = toupper(interfaceAns);
+//	} while (interfaceAns != 'L' && interfaceAns != 'S' && interfaceAns != 'R');
+//
+//	int i;
+//
+//	if (interfaceAns == 'L') // If user chooses to login
+//	{
+//		user_login(c, &i); // Call the login function to perform login process
+//		*id_ptr = i; // Store the user ID in the memory location pointed by id_ptr
+//	}
+//	else if (interfaceAns == 'S') // If user chooses to sign up
+//	{
+//		user_signup(c); // Call the signup function to perform sign up process
+//	}
+//	else if (interfaceAns == 'R') // If user chooses to reset password
+//	{
+//		user_resetpwd(c, &i); // Call the resetpwd function to perform password reset process
+//		*id_ptr = i; // Store the user ID in the memory location pointed by id_ptr
+//		main(); // Call the main function to restart the program after password reset
+//	}
+//
+//	return;
+//}
+//
+////function for user login
+//int user_login(USER c[], int* i_ptr)
+//{
+//	char username[50], password[50];
+//	bool userpassopt, usernameopt;
+//
+//	int i;
+//	do
+//	{
+//		cin.ignore(1); // Ignore a single character in the input buffer to clear any remaining newline characters
+//		cout << "Please enter your username --> ";
+//		cin >> username; // Read user input for username
+//
+//		cout << "Please enter your password --> ";
+//		cin >> password; // Read user input for password
+//
+//		fflush(stdin); // Flush the input buffer to clear any remaining characters
+//
+//		for (int i = 0; i < 50; i++) // Iterate through the array of CLIENT objects
+//		{
+//			if (strcmp(c[i].username, username) == 0) // Compare the entered username with the username in CLIENT object
+//			{
+//				usernameopt = true; // Set usernameopt flag to true indicating username match
+//
+//				if (strcmp(c[i].password, password) == 0) // Compare the entered password with the password in CLIENT object
+//				{
+//					userpassopt = true; // Set userpassopt flag to true indicating password match
+//					*i_ptr = i; // Store the index of the matched CLIENT object in the memory location pointed by i_ptr
+//					break; // Break out of the loop as the login is successful
+//				}
+//				else
+//				{
+//					userpassopt = false; // Set userpassopt flag to false indicating incorrect password
+//				}
+//			}
+//			else
+//			{
+//				usernameopt = false; // Set usernameopt flag to false indicating no username match
+//			}
+//		}
+//
+//		if ((userpassopt == false || usernameopt == false))
+//		{
+//			cout << "\nIncorrect password or username\n" << endl; // Display error message for incorrect username or password
+//		}
+//		else
+//		{
+//			cout << "\nLogin successful\n" << endl; // Display success message for successful login
+//		}
+//
+//	} while (usernameopt == false); // Continue looping until a valid username is entered
+//
+//	return 0;
+//}
+//
+////function for user to signup
+//void user_signup(USER c[])
+//{
+//	int phone_len, ic_len;
+//	string name, password1, password2, age, contact_num, ic, stats;
+//	bool validate, validrange, validateic, validrangeic, validate2, validrangephone;
+//	validateic = true;
+//	validate2 = true;
+//	validate = true;
+//	stats = "NULL";
+//
+//	// Get user's name
+//	cout << "Please enter your name: ";
+//	getline(cin >> ws, name);
+//
+//	// Get user's age
+//	cout << "Please enter your age: ";
+//	do
+//	{
+//		cin >> age;
+//		// Validate if age is a number
+//		bool validate = check_number(age);
+//		if (validate == true)
+//		{
+//			// Check if age is within valid range (12 to 110)
+//			if ((atoi(age.c_str()) <= 110) && (atoi(age.c_str()) >= 12))
+//			{
+//				validrange = true;
+//			}
+//			else
+//			{
+//				validrange = false;
+//			}
+//		}
+//		else
+//		{
+//			cout << "Invalid input" << endl;
+//		}
+//
+//		if (validate == false || validrange == false)
+//			cout << "Please enter your age again: ";
+//
+//	} while (validate == false || validrange == false);
+//
+//	// Get user's IC number
+//	cout << "Please enter your ic number without '-' (0123456789012): ";
+//	do
+//	{
+//		cin >> ic;
+//		// Validate if IC number is a number
+//		bool validateic = check_number(ic);
+//		if (validateic == true)
+//		{
+//			char icarray[30];
+//			strcpy(icarray, ic.c_str());
+//			ic_len = strlen(icarray);
+//			// Check if IC number length is within valid range (11 to 13)
+//			if ((ic_len < 13) && (ic_len > 11))
+//			{
+//				validrangeic = true;
+//			}
+//			else
+//			{
+//				validrangeic = false;
+//			}
+//		}
+//		else
+//		{
+//			cout << "Invalid input" << endl;
+//		}
+//
+//		if (validateic == false || validrangeic == false)
+//			cout << "Please enter your ic again: ";
+//
+//	} while (validateic == false || validrangeic == false);
+//
+//	// Get user's contact number
+//	cout << "Please enter your contact number without '-' (i.e:0183958711): ";
+//	do
+//	{
+//		cin >> contact_num;
+//		// Validate if contact number is a number
+//		bool validate2 = check_number(contact_num);
+//		char contactnumarray[30];
+//		strcpy(contactnumarray, contact_num.c_str());
+//		phone_len = strlen(contactnumarray);
+//		// Check if contact number length is within valid range (10 to 13)
+//		if ((phone_len <= 13) && (phone_len >= 10))
+//		{
+//			validrangephone = true;
+//		}
+//		else
+//		{
+//			validrangephone = false;
+//		}
+//		if (validate2 == false || validrangephone == false)
+//		{
+//			cout << "Invalid input" << endl;
+//			cout << "Please enter your contact number again without '-' (i.e:0183958711): ";
+//		}
+//	} while (validate2 == false || validrangephone == false);
+//
+//	// Get user's password
+//	do
+//	{
+//		cout << "Please enter your password: ";
+//		cin >> password1;
+//
+//		cout << "Please enter your password again: ";
+//		cin >> password2;
+//		if (password1 != password2)
+//		{
+//			cout << "Different password entered \n"; // Prompt user that different passwords were entered
+//			cout << "Please try again\n"; // Prompt user to try again
+//			cout << "Please enter your password: "; // Prompt user to enter password again
+//			cin >> password1;
+//
+//			cout << "Please enter your password again: "; // Prompt user to enter password again
+//			cin >> password2;
+//		}
+//
+//	} while (password1 != password2); // Repeat until password1 and password2 match
+//
+//
+//	ofstream passwordfile("userpassword.txt", ios::app); // Create an output file stream to append to userpassword.txt file
+//	passwordfile << password2 << endl; // Write password2 to userpassword.txt followed by newline
+//
+//
+//	ofstream username("username.txt", ios::app); // Create an output file stream to append to username.txt file
+//	username << name << endl; // Write name to username.txt followed by newline
+//
+//
+//	ofstream agefile("userage.txt", ios::app); // Create an output file stream to append to userage.txt file
+//	agefile << age << endl; // Write age to userage.txt followed by newline
+//
+//
+//	ofstream phonenumfile("userphone.txt", ios::app); // Create an output file stream to append to userphone.txt file
+//	phonenumfile << contact_num << endl; // Write contact_num to userphone.txt followed by newline
+//
+//
+//	ofstream icfile("useric.txt", ios::app); // Create an output file stream to append to useric.txt file
+//	icfile << ic << endl; // Write ic to useric.txt followed by newline
+//
+//
+//	ofstream stats_file("status.txt", ios::app); // Create an output file stream to append to stats.txt file
+//	stats_file << stats << endl; // Write vac to vac_stats.txt followed by newline
+//
+//
+//	system("CLS"); // Clear screen
+//	cout << "Sign up complete \n"; // Prompt user that sign up is complete
+//	main(); // Call main() function to restart the program
+//}
+//
+////function to reset user's password
+//int user_resetpwd(USER c[], int* i_ptr)
+//{
+//	// Input for username and new password
+//	string username, resetpassword;
+//	cout << "Enter your username: ";
+//	cin >> username;
+//	cout << "Enter your new password: ";
+//	cin >> resetpassword;
+//
+//	string usernameToFind = username; // Username to find
+//	string newPassword = resetpassword; // New password to replace
+//
+//	// Open the username text file for reading
+//	ifstream usernameFile("username.txt");
+//	if (!usernameFile.is_open()) {
+//		cout << "Failed to open username file." << endl;
+//		//return 1;
+//	}
+//
+//	// Open the password text file for reading
+//	ifstream passwordFile("userpassword.txt");
+//	if (!passwordFile.is_open()) {
+//		cout << "Failed to open password file." << endl;
+//		usernameFile.close();
+//		//return 1;
+//	}
+//
+//	vector<string> usernames; // Vector to store usernames from file
+//	vector<string> passwords; // Vector to store passwords from file
+//	string line;
+//
+//	// Read usernames and passwords from the files into memory
+//	while (getline(usernameFile, line)) {
+//		usernames.push_back(line);
+//		getline(passwordFile, line);
+//		passwords.push_back(line);
+//	}
+//
+//	usernameFile.close(); // Close username file
+//	passwordFile.close(); // Close password file
+//
+//	// Search for the username to find and update the corresponding password
+//	bool found = false;
+//	for (size_t i = 0; i < usernames.size(); ++i) {
+//		if (usernames[i] == usernameToFind) {
+//			found = true;
+//			passwords[i] = newPassword; // Update password
+//			*i_ptr = i; // Store index of updated password
+//			break;
+//		}
+//	}
+//
+//	if (found) {
+//		// Write the updated passwords back to the password file
+//		ofstream updatedPasswordFile("userpassword.txt");
+//		if (!updatedPasswordFile.is_open()) {
+//			cout << "Failed to open updated password file." << endl;
+//			return 1;
+//		}
+//
+//		for (size_t i = 0; i < passwords.size(); ++i) {
+//			updatedPasswordFile << passwords[i] << endl;
+//		}
+//
+//		updatedPasswordFile.close(); // Close updated password file
+//
+//		cout << "Password updated successfully." << endl;
+//
+//	}
+//	else {
+//		cout << "Username not found." << endl;
+//	}
+//	return 0;
+//}
+
 
 //function to validate if the string is number
 bool check_number(string str) {
