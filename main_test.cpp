@@ -1719,11 +1719,22 @@ void doctor_mainmenu(USER c[], int id)
 //patient feedback
 void feedback(USER c[], int id)
 {
-	system("CLS");
-	cout << "Username:\t\t" << c[id].username << endl;
-	cout << "User ic:\t\t" << c[id].ic << endl;
-	cout << "User status:\t\t" << c[id].status << endl;
-	cout << "Feedback:\t\t" << c[id].feedback << endl;
+	
+	char ans; 
+	do
+	{
+		system("CLS");
+		cout << "Username:\t\t" << c[id].username << endl;
+		cout << "User ic:\t\t" << c[id].ic << endl;
+		cout << "User status:\t\t" << c[id].status << endl;
+		cout << "Feedback:\t\t" << c[id].feedback << endl;
+		cout << "\n\n\n";
+		cout << "Enter <B> to back to main menu\t >>> ";
+		cin >> ans;
+		ans = toupper(ans);
+	} while (ans != 'Y');
+
+	user_mainmenu(c, id);
 }
 
 
