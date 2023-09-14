@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_DEPRECATE
+﻿#define _CRT_SECURE_NO_DEPRECATE
 
 // library
 #include <iostream> //cin and cout
@@ -49,18 +49,25 @@ int doctor_resetpwd(DOCTOR d[], int* i_ptr);
 void doctor_feedback(USER c[], int* i_ptr);
 
 // Patients main menu functions
-void user_mainmenu(USER C[], int id);
+void user_mainmenu(USER c[], int id);
 int user_resetpwd(USER c[], int* i_ptr);
 int user_update(USER c[], int id);
+void diagnose(USER c[], int id);
 int updatePhonenum(USER c[], int id);
 int updateStatus(USER c[], int id);
-int faq(USER c[], int id);
+void faq(USER c[], int id);
 
 // Function used to logout of the account
 void exit();
 
 //Check input is number or no
 bool check_number(string str);
+
+//faq functions
+void hyperglycemia_faq(USER c[], int id);
+void hypoglycemia_faq(USER c[], int id);
+void diabetes_faq(USER c[], int id);
+
 
 
 // main function
@@ -70,8 +77,8 @@ int main()
 	system("CLS");
 
 	// Create an array of CLIENT structs
-	USER c[50];
-	DOCTOR d[50];
+	USER c[20];
+	DOCTOR d[20];
 
 	// Open input files (patients)
 	ifstream name_file("username.txt", ios::in);
@@ -100,7 +107,7 @@ int main()
 	else
 	{
 		// Read data from input files into the CLIENT array
-		for (int i = 0; i < 50; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			name_file >> c[i].username;
 			pass_file >> c[i].password;
@@ -128,7 +135,7 @@ int main()
 	else
 	{
 		// Read data from input files into the CLIENT array
-		for (int i = 0; i < 50; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			doc_name_file >> d[i].d_name;
 			doc_pass_file >> d[i].d_password;
@@ -136,11 +143,10 @@ int main()
 			doc_phonenum_file >> d[i].d_contactnum;
 		}
 		// Close input files
-		name_file.close();
-		pass_file.close();
-		ic_file.close();
-		phonenum_file.close();
-		stats_file.close();
+		doc_name_file.close();
+		doc_pass_file.close();
+		doc_ic_file.close();
+		doc_phonenum_file.close();
 	}
 
 	// Call login interface function
@@ -167,10 +173,8 @@ int main()
 		doctor_login_interface(d, &id);
 		doctor_mainmenu(c, id);
 	}
-
 	return 0;
 }
-
 
 
 
@@ -461,6 +465,8 @@ int user_resetpwd(USER c[], int* i_ptr)
 	}
 	return 0;
 }
+
+
 
 //// doctor login function definitions
 //void user_login_interface(USER c[], int* id_ptr)
@@ -779,6 +785,7 @@ int user_resetpwd(USER c[], int* i_ptr)
 //}
 
 
+
 //function to validate if the string is number
 bool check_number(string str) {
 	for (int i = 0; i < str.length(); i++) {
@@ -830,8 +837,7 @@ void user_mainmenu(USER c[], int id)
 	if (ans == '1')
 	{
 		system("CLS"); // Clear the screen
-		//diagnose(c, id); // Call the covidcategory() function
-		cout << "Diagnose waiting to be done";
+		diagnose(c, id); // Call the diagnose() function to diagnose
 	}
 
 	else if (ans == '2')
@@ -855,10 +861,17 @@ void user_mainmenu(USER c[], int id)
 	else
 	{
 		cout << "invalid input please try again"; // Display error message
-		user_mainmenu(c, id); // Call the mainmenu() function recursively to retry
+		user_mainmenu(c, id); // Call the user_mainmenu() function recursively to retry
 	}
 
 	return; // Return from the function
+}
+
+//function for user to diagnose their status
+void diagnose(USER c[], int id)
+{
+	int disease; //1 for hyperglycemia, 2 for hypoglycemia, 3 for diabetes
+	cout << "Diagnose waiting to be done";
 }
 
 //function for user to update their info
@@ -957,15 +970,15 @@ int updatePhonenum(USER c[], int id)
 	return 0;
 }
 
-//function for user to update their category
+//function for user to update their status
 int updateStatus(USER c[], int id)
 {
-	string resetcategory;
-	cout << "Enter your new category: ";
-	cin >> resetcategory; // Get the new category from user input
+	string resetstatus;
+	cout << "Enter your new status: ";
+	cin >> resetstatus; // Get the new status from user input
 
 	string usernameToFind = c[id].username; // Username to find
-	string newCategory = resetcategory; // Store the new category
+	string newstatus = resetstatus; // Store the new status
 
 	// Open the username text file for reading
 	ifstream usernameFile("username.txt");
@@ -974,53 +987,53 @@ int updateStatus(USER c[], int id)
 		return 1;
 	}
 
-	// Open the category text file for reading
-	ifstream categoryFile("category.txt");
-	if (!categoryFile.is_open()) {
-		cout << "Failed to open category file." << endl;
+	// Open the status text file for reading
+	ifstream statusFile("status.txt");
+	if (!statusFile.is_open()) {
+		cout << "Failed to open status file." << endl;
 		usernameFile.close();
 		return 1;
 	}
 
 	vector<string> usernames;
-	vector<string> category;
+	vector<string> status;
 	string line;
 
-	// Read usernames and category from the files into memory
+	// Read usernames and status from the files into memory
 	while (getline(usernameFile, line)) {
 		usernames.push_back(line);
-		getline(categoryFile, line);
-		category.push_back(line);
+		getline(statusFile, line);
+		status.push_back(line);
 	}
 
 	usernameFile.close();
-	categoryFile.close();
+	statusFile.close();
 
 	bool found = false;
-	// Search for the username to find and update the corresponding category
+	// Search for the username to find and update the corresponding status
 	for (size_t i = 0; i < usernames.size(); ++i) {
 		if (usernames[i] == usernameToFind) {
 			found = true;
-			category[i] = newCategory; // Update the category
+			status[i] = newstatus; // Update the status
 			break;
 		}
 	}
 
 	if (found) {
-		// Write the updated category back to the category file
-		ofstream updatedcategoryFile("category.txt");
-		if (!updatedcategoryFile.is_open()) {
-			cout << "Failed to open updated category file." << endl;
+		// Write the updated status back to the status file
+		ofstream updatedstatusFile("status.txt");
+		if (!updatedstatusFile.is_open()) {
+			cout << "Failed to open updated status file." << endl;
 			return 1;
 		}
 
-		for (size_t i = 0; i < category.size(); ++i) {
-			updatedcategoryFile << category[i] << endl;
+		for (size_t i = 0; i < status.size(); ++i) {
+			updatedstatusFile << status[i] << endl;
 		}
 
-		updatedcategoryFile.close();
+		updatedstatusFile.close();
 
-		cout << "Category updated successfully." << endl;
+		cout << "Status updated successfully." << endl;
 	}
 	else {
 		cout << "Username not found." << endl;
@@ -1029,13 +1042,643 @@ int updateStatus(USER c[], int id)
 	return 0;
 }
 
+
+
 //function for FAQ
-int faq(USER c[], int id)
+void faq(USER c[], int id)
 {
 	system("CLS");
-	cout << "FAQ";
-	return 0;
+	char choose;
+	do
+	{
+		cout << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "This is FAQ:" << endl;
+		cout << endl;
+		cout << "<1> Questions about Diabetes" << endl;
+		cout << "<2> Questions about Hyperglycemia" << endl;
+		cout << "<3> Questions about Hypoglycemia" << endl;
+		cout << "<4> Back to Main Menu" << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Please type in number--->";
+		cin >> choose;
+		cout << "" << endl;
+
+		if (choose != '1' && choose != '2' && choose != '3' && choose != '4')
+		{
+			system("CLS");
+			cout << "Invalid input, please type in a valid number!";
+		}
+
+	} while (choose != '1' && choose != '2' && choose != '3' && choose != '4');
+
+	//------------------------FAQ main page--------------------------------
+
+	if (choose == '1')
+	{
+		system("CLS");
+		diabetes_faq(c, id);
+	}
+
+	else if (choose == '2')
+	{
+		system("CLS");
+		hyperglycemia_faq(c, id);
+	}
+
+	else if (choose == '3')
+	{
+		system("CLS");
+		hypoglycemia_faq(c, id);
+	}
+
+	else if (choose == '4')
+	{
+		system("CLS");
+		user_mainmenu(c, id);
+	}
 }
+
+void hyperglycemia_faq(USER c[], int id)
+{
+	char choose;
+	do
+	{
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Here are most frequent question asked:" << endl;
+		cout << endl;
+		cout << "<1> What is hyperglycemia?" << endl;
+		cout << "<2> What are the symptoms of hyperglycemia?" << endl;
+		cout << "<3> Can hyperglycemia be dangerous?" << endl;
+		cout << "<4> What foods should I avoid during hyperglycemia?" << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Type in a number>>";
+		cin >> choose;
+
+		if (choose != '1' && choose != '2' && choose != '3' && choose != '4')
+		{
+			system("CLS");
+			cout << "Invalid input, please type in a valid number!";
+		}
+
+	} while (choose != '1' && choose != '2' && choose != '3' && choose != '4');
+
+	//----------------------Hyperglycemia faq main page---------------------
+
+	if (choose == '1')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What is hyperglycemia?" << endl;
+		cout << endl;
+		cout << "High blood sugar levels characterize the disease known as hyperglycemia, " << endl;
+		cout << "which is frequently linked to diabetes. It happens when the body can't" << endl;
+		cout << " utilise insulin properly or doesn't produce enough of it." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+	if (choose == '2')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What is the symptoms of hyperglycemia?" << endl;
+		cout << endl;
+		cout << "Frequent urine, excessive thirst, increased hunger, exhaustion, impaired vision, dry mouth, " << endl;
+		cout << "sluggish wound healing, recurring infections, unexplained weight loss, and occasionally " << endl;
+		cout << "disorientation or nausea are signs of hyperglycemia, or high blood sugar. These signs and " << endl;
+		cout << "symptoms result from the body's failure to control blood sugar levels effectively. " << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+
+	}
+
+	if (choose == '3')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Can hyperglycemia be dangerous?" << endl;
+		cout << endl;
+		cout << "Yes,Diabetes complications, such as diabetic ketoacidosis (DKA) in Type 1 diabetes, " << endl;
+		cout << "can result from persistent or extreme high blood sugar levels. In the extreme condition" << endl;
+		cout << "known as DKA, the body begins metabolizing fat for energy, which causes an accumulation of" << endl;
+		cout << "ketones and a risky change in blood pH. Persistent hyperglycemia in Type 2 diabetes can lead" << endl;
+		cout << "to long-term issues with the heart, kidneys, nerves, vision, and blood vessels." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+	if (choose == '4')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What foods should I avoid during hyperglycemia?" << endl;
+		cout << endl;
+		cout << "It's crucial to stay away from meals that might quickly boost blood sugar levels when you have hyperglycemia. " << endl;
+		cout << " Sugary drinks, sweets, desserts, and other foods high in refined sugars are some examples.Limit your" << endl;
+		cout << "intake of processed foods as well, especially those with high carbohydrate and sugar content.White bread, " << endl;
+		cout << "white rice, and sugary cereals should be avoided. Instead, emphasize full,unprocessed foods that can help" << endl;
+		cout << "regulate blood sugar levels and improve general health, such as vegetables, whole grains, lean meats, and healthy fats." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+}
+
+void hypoglycemia_faq(USER c[], int id)
+{
+	char choose;
+	do
+	{
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Here are most frequent question asked:" << endl;
+		cout << endl;
+		cout << "<1> What is hypoglycemia?" << endl;
+		cout << "<2> What causes hypoglycemia?" << endl;
+		cout << "<3> What are the symptoms of hypoglycemia？" << endl;
+		cout << "<4> How can I prevent hypoglycemia?" << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Type in a number>>";
+		cin >> choose;
+
+		if (choose != '1' && choose != '2' && choose != '3' && choose != '4')
+		{
+			system("CLS");
+			cout << "Invalid input, please type in a valid number!";
+		}
+
+	} while (choose != '1' && choose != '2' && choose != '3' && choose != '4');
+
+	//----------------------Hypoglycemia faq main page---------------------
+
+	if (choose == '1')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What is hypoglycemia?" << endl;
+		cout << endl;
+		cout << "Blood sugar levels that are excessively low, usually below 70 mg/dL, are indicative of the condition known" << endl;
+		cout << "as hypoglycemia. From minor pain to serious consequences, it may produce symptoms." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			system("CLS");
+			user_mainmenu(c, id);
+		}
+
+	}
+
+	if (choose == '2')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What causes hypoglycemia?" << endl;
+		cout << endl;
+		cout << "If you take too much insulin or some diabetic drugs, skip meals, exercise a lot without adjusting" << endl;
+		cout << "your insulin or food intake, take alcohol without eating enough, or postpone or skip meals," << endl;
+		cout << "you could develop hypoglycemia." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+
+	}
+
+	if (choose == '3')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What are the symptoms of hypoglycemia？" << endl;
+		cout << endl;
+		cout << "Shivering, sweating, dizziness, irritability, a quick heartbeat, hunger, and confusion are just" << endl;
+		cout << "a few of the symptoms of hypoglycemia, or low blood sugar. More severe cases may cause memory" << endl;
+		cout << "loss, headaches, blurred vision, weakness, convulsions, or even coma. These signs and symptoms" << endl;
+		cout << "appear because the brain uses glucose as fuel and is affected when blood sugar levels go too low." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+	if (choose == '4')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "WHow can I prevent hypoglycemia?" << endl;
+		cout << endl;
+		cout << "Maintain a regular eating schedule with well-balanced meals and snacks to prevent hypoglycemia." << endl;
+		cout << "Maintain regular blood sugar monitoring, and adjust insulin or medicine dosages as necessary." << endl;
+		cout << "To swiftly treat moderate episodes, carry fast-acting carbs like glucose pills, fruit juice, or candies." << endl;
+		cout << " If you want to exercise, check your blood sugar levels before and after, and make any necessary diet" << endl;
+		cout << " or insulin adjustments. To fine-tune your management strategy and reduce the risk of hypoglycemia," << endl;
+		cout << " communication with your healthcare practitioner and diabetes care team is crucial." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+}
+
+void diabetes_faq(USER c[], int id)
+{
+
+	char choose;
+	do
+	{
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Here are most frequent question asked:" << endl;
+		cout << endl;
+		cout << "<1> What is diabetes?" << endl;
+		cout << "<2> What are the types of diabetes?" << endl;
+		cout << "<3> What is HbA1c, and why is it important?" << endl;
+		cout << "<4> What is insulin, and when is it needed?" << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "Type in a number>>";
+		cin >> choose;
+
+		if (choose != '1' && choose != '2' && choose != '3' && choose != '4')
+		{
+			system("CLS");
+			cout << "Invalid input, please type in a valid number!";
+		}
+
+	} while (choose != '1' && choose != '2' && choose != '3' && choose != '4');
+
+	//----------------------Hyperglycemia faq main page---------------------
+
+	if (choose == '1')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What is diabetes?" << endl;
+		cout << endl;
+		cout << "Diabetes is a chronic medical disorder in which your blood sugar levels are perpetually" << endl;
+		cout << "higher than normal due to either insufficient insulin production or inefficient insulin usage." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+	if (choose == '2')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What are the types of diabetes?" << endl;
+		cout << endl;
+		cout << "Type 1 diabetes, an autoimmune disorder in which the body doesn't make insulin, Type 2  " << endl;
+		cout << "diabetes, characterized by insulin resistance and insufficient insulin production, and" << endl;
+		cout << "gestational diabetes, which develops during pregnancy and frequently goes away after giving birth," << endl;
+		cout << "are the three primary kinds of diabetes. Each category has unique causes and methods of care." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+
+	}
+
+	if (choose == '3')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What is HbA1c, and why is it important?" << endl;
+		cout << endl;
+		cout << "Hemoglobin A1c, often known as HbA1c, is a blood test that gauges the typical blood sugar levels " << endl;
+		cout << "during the previous two to three months. Due to the information it offers about long-term " << endl;
+		cout << "glucose control, it is crucial for the management of diabetes. Poorer blood sugar management," << endl;
+		cout << "which raises the risk of diabetic complications, is indicated by a greater HbA1c.Regular" << endl;
+		cout << "HbA1c monitoring aids healthcare professionals in evaluating the efficacy of treatments" << endl;
+		cout << "and making necessary adjustments to their plans." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+
+	if (choose == '4')
+	{
+		system("CLS");
+		char choose_BM;
+		//display information for faq of hyperglycemia
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "What is insulin, and when is it needed?" << endl;
+		cout << endl;
+		cout << "The pancreas secretes the hormone insulin, which aids in controlling blood sugar levels. It permits" << endl;
+		cout << "the bloodstream's glucose to be absorbed by cells for energy. Since their pancreas cannot create any insulin," << endl;
+		cout << "people with Type 1 diabetes need it constantly. When oral medications or lifestyle modifications are insufficient" << endl;
+		cout << "to properly control blood sugar levels, some people with Type 2 diabetes may need insulin." << endl;
+		cout << "--------------------------------------------------------------------------------------" << endl;
+		cout << "<B>ack		<M>ain menu" << endl;
+		cout << "(B/M)?--->";
+		cin >> choose_BM;
+
+		// Take user input for choice and convert it to uppercase
+		choose_BM = toupper(choose_BM);
+
+		// Validate user input and loop until a valid choice is entered
+		while (choose_BM != 'B' && choose_BM != 'M')
+		{
+			cout << "Invalid input, please try again" << endl;
+			cout << "(B/M)?--->";
+			cin >> choose_BM;
+			choose_BM = toupper(choose_BM);
+		}
+
+		// Based on user choice, call appropriate functions (faq or mainmenu)
+		if (choose_BM == 'B')
+		{
+			faq(c, id);
+		}
+		else if (choose_BM == 'M')
+		{
+			cout << "wait for program done";
+			//back to main menu
+		}
+	}
+}
+
 
 
 
@@ -1044,10 +1687,46 @@ int faq(USER c[], int id)
 // Doctor login function definition
 void doctor_mainmenu(USER c[], int id)
 {
-	cout << "Waiting to be done";
+	system("CLS"); // Clear the screen
+	time_t ttime = time(0); // Variable to store current time
+	char* dt = ctime(&ttime); // Get current time as string
+	cout << "Today's Date and Time -->\t" << dt << endl; // Print current date and time
+	char status = ' '; // Variable to store status
+	cout << "========================================================================================================================" << endl;
+	cout << "   " << left << setw(25) << "Name" << left << setw(20) << "Ic number" << left << setw(23) << "Contact Number" << left << setw(25) << "Status" << left << setw(18) << endl; // Display column headers
+	cout << "========================================================================================================================" << endl;
+	for (int i = 0; i < 20; i++)
+	{
+		cout << i+1 << "." << " ";
+		cout << left << setw(25);
+		cout << c[id].username; // Display username from the USER array
+		cout << left << setw(20);
+		cout << c[id].ic; // Display IC number from the USER array
+		cout << left << setw(23);
+		cout << c[id].contactnum; // Display contact number from the USER array
+		cout << left << setw(25);
+		cout << c[id].status; // Display status from the USER array
+		cout << endl;
+	}
+	cout << endl;
+	cout << endl;
+	cout << endl;
+	cout << "1. hyperglycemia" << endl;
+	cout << "2. hypoglycemia" << endl;
+	cout << "3. diabetes" << endl;
+	cout << endl;
+	cout << endl;
+	int decision;
+	cout << "Enter the index number of the patient to provide feedback:\t>>> ";
+	cin >> decision;
+	//make decision redirect to the specific patient and record down the feedback in feedback.txt
+
 }
 
-
+void feedback()
+{
+	cout << "Feedback waiting to be done";
+}
 
 
 
