@@ -1743,14 +1743,15 @@ void feedback(USER c[], int id)
 //doctor feedback
 void doctor_feedback(USER c[], int* i_ptr)
 {
+	cin.clear();
 	system("CLS");
-	char feedback[600];
+	string d_feedback;
 	cout << "Username:\t\t" << c[*i_ptr].username << endl;
 	cout << "User ic:\t\t" << c[*i_ptr].ic << endl;
 	cout << "User status:\t\t" << c[*i_ptr].status << endl;
 	cout << "Enter your feedback:\t";
-	cin.get(feedback, 50);
-	cout << &feedback[0];
+	getline(cin, d_feedback);
+	cout << "feedback: " << d_feedback;
 }
 
 
