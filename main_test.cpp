@@ -25,7 +25,7 @@ typedef struct
 	char ic[30];
 	char contactnum[30];
 	char status[20];
-	char feedback[600];
+	char feedbacks[600];
 }USER;
 
 // typedef for doctor
@@ -59,7 +59,7 @@ void user_signup(USER c[]);
 // Doctor main menu functions
 void doctor_mainmenu(USER c[], int id);
 int doctor_resetpwd(DOCTOR d[], int* i_ptr);
-void doctor_feedback(USER c[], int* i_ptr);
+void doctor_feedback(USER c[], int id);
 
 
 
@@ -123,7 +123,7 @@ bool check_number(string str); //Check input is number or no
 
 
 
-// main function
+//main function
 int main()
 {
 	// Clear screen
@@ -170,7 +170,7 @@ int main()
 			ic_file >> c[i].ic;
 			phonenum_file >> c[i].contactnum;
 			stats_file >> c[i].status;
-			feedback_file >> c[i].feedback;
+			feedback_file >> c[i].feedbacks;
 		}
 		// Close input files
 		name_file.close();
@@ -246,7 +246,7 @@ bool check_number(string str) {
 
 
 
-// user login function definitions
+//user login function definitions
 void user_login_interface(USER c[], int* id_ptr)
 {
 	char interfaceAns;
@@ -337,12 +337,13 @@ int user_login(USER c[], int* i_ptr)
 void user_signup(USER c[])
 {
 	int phone_len, ic_len;
-	string name, password1, password2, contact_num, ic, stats;
+	string name, password1, password2, contact_num, ic, stats, temp_feedback;
 	bool validate, validrange, validateic, validrangeic, validate2, validrangephone;
 	validateic = true;
 	validate2 = true;
 	validate = true;
 	stats = "NULL";
+	temp_feedback = "NULL";
 
 	// Get user's name
 	cout << "Please enter your name: ";
@@ -444,8 +445,12 @@ void user_signup(USER c[])
 	icfile << ic << endl; // Write ic to useric.txt followed by newline
 
 
-	ofstream stats_file("status.txt", ios::app); // Create an output file stream to append to stats.txt file
-	stats_file << stats << endl; // Write vac to vac_stats.txt followed by newline
+	ofstream stats_file("status.txt", ios::app); // Create an output file stream to append to status.txt file
+	stats_file << stats << endl; // Write status to status.txt followed by newline
+
+
+	ofstream feedback_file("feedback.txt", ios::app); // Create an output file stream to append to feedback.txt file
+	feedback_file << temp_feedback << endl; // Write a temporary feedback to feedback.txt followed by newline
 
 
 	system("CLS"); // Clear screen
@@ -767,7 +772,8 @@ int doctor_resetpwd(DOCTOR d[], int* i_ptr)
 	string line;
 
 	// Read usernames and passwords from the files into memory
-	while (getline(usernameFile, line)) {
+	while (getline(usernameFile, line)) 
+	{
 		usernames.push_back(line);
 		getline(passwordFile, line);
 		passwords.push_back(line);
@@ -871,7 +877,7 @@ void user_mainmenu(USER c[], int id)
 	else if (ans == '4')
 	{
 		system("CLS"); // Clear the screen
-		feedback(c, id); // Call the faq() function
+		feedback(c, id); // Call the feedback() function
 	}
 
 	else if (ans == '5')
@@ -1687,7 +1693,7 @@ void doctor_mainmenu(USER c[], int id)
 	cout << "Today's Date and Time -->\t" << dt << endl; // Print current date and time
 	char status = ' '; // Variable to store status
 	cout << "========================================================================================================================" << endl;
-	cout << "\t" << left << setw(25) << "Name" << left << setw(20) << "Ic number" << left << setw(23) << "Contact Number" << left << setw(25) << "Status" << left << setw(18) << endl; // Display column headers
+	cout << "No.\t" << left << setw(25) << "Name" << left << setw(20) << "Ic number" << left << setw(23) << "Contact Number" << left << setw(25) << "Status" << left << setw(18) << endl; // Display column headers
 	cout << "========================================================================================================================" << endl;
 	for (int id = 0; id < 20; id++)
 	{
@@ -1704,13 +1710,17 @@ void doctor_mainmenu(USER c[], int id)
 	}
 	cout << endl;
 	cout << endl;
-	cout << endl;
 	int decision;
-	cout << "Enter the index number of the patient to provide feedback:\t>>> ";
-	cin >> decision;
-	decision -= decision;
+	do {
+		
+		cout << "\nPlease enter numerical numbers only\n";
+		cout << "Enter the index number of the patient to provide feedback:\t>>> ";
+		cin >> decision;
+	} while (decision < 1 || decision > 20);
+	decision--;
+
 	//make decision redirect to the specific patient and record down the feedback in feedback.txt
-	doctor_feedback(c, &decision);
+	doctor_feedback(c, decision);
 }
 
 
@@ -1727,12 +1737,12 @@ void feedback(USER c[], int id)
 		cout << "Username:\t\t" << c[id].username << endl;
 		cout << "User ic:\t\t" << c[id].ic << endl;
 		cout << "User status:\t\t" << c[id].status << endl;
-		cout << "Feedback:\t\t" << c[id].feedback << endl;
+		cout << "Feedback:\t\t" << c[id].feedbacks << endl;
 		cout << "\n\n\n";
 		cout << "Enter <B> to back to main menu\t >>> ";
 		cin >> ans;
 		ans = toupper(ans);
-	} while (ans != 'Y');
+	} while (ans != 'B');
 
 	user_mainmenu(c, id);
 }
@@ -1741,17 +1751,76 @@ void feedback(USER c[], int id)
 
 
 //doctor feedback
-void doctor_feedback(USER c[], int* i_ptr)
+void doctor_feedback(USER c[], int id)
 {
 	cin.clear();
 	system("CLS");
 	string d_feedback;
-	cout << "Username:\t\t" << c[*i_ptr].username << endl;
-	cout << "User ic:\t\t" << c[*i_ptr].ic << endl;
-	cout << "User status:\t\t" << c[*i_ptr].status << endl;
-	cout << "Enter your feedback:\t";
-	getline(cin, d_feedback);
-	cout << "feedback: " << d_feedback;
+	cout << "Name\t\t\t\t\t: " << c[id].username << endl;
+	cout << "Contact Number\t\t\t\t: " << c[id].contactnum << endl;
+	cout << "Feedback (Use \"_\" as the spacing)\t: "; // Prompting doctor to enter new feedback
+	cin >> d_feedback; // Reading new feedback from user
+
+	string usernameToFind = c[id].username; // Username to find
+	string newFeedback = d_feedback;
+
+	ifstream usernameFile("username.txt"); // Opening username file for reading
+	if (!usernameFile.is_open()) {
+		cout << "Failed to open username file." << endl; // Displaying error message if failed to open file
+		//return 1;
+	}
+
+	ifstream feedbackFile("feedback.txt"); // Opening feedback file for reading
+	if (!feedbackFile.is_open()) {
+		cout << "Failed to open feedback file." << endl; // Displaying error message if failed to open file
+		usernameFile.close();
+		//return 1;
+	}
+
+	vector<string> usernames; // Vector to store usernames
+	vector<string> feedbacks; // Vector to store feedback
+	string line;
+
+	// Reading usernames and feedback from respective files
+	while (getline(usernameFile, line)) {
+		usernames.push_back(line);
+		getline(feedbackFile, line);
+		feedbacks.push_back(line);
+	}
+
+	usernameFile.close();
+	feedbackFile.close();
+
+	bool found = false;
+	for (size_t i = 0; i < usernames.size(); ++i) {
+		if (usernames[i] == usernameToFind) { // Finding username in the vector
+			found = true;
+			feedbacks[i] = newFeedback; // Updating feedback in the vector
+			break;
+		}
+	}
+
+	if (found) {
+		ofstream updatedFeedbackFile("feedback.txt"); // Opening feedback file for writing
+		if (!updatedFeedbackFile.is_open()) {
+			cout << "Failed to open updated feedback file." << endl; // Displaying error message if failed to open file
+			//return 1;
+		}
+
+		// Writing updated feedback to the file
+		for (size_t i = 0; i < feedbacks.size(); ++i) {
+			updatedFeedbackFile << feedbacks[i] << endl;
+		}
+
+		updatedFeedbackFile.close();
+
+		cout << "Feedback updated successfully." << endl; // Displaying success message
+	}
+	else {
+		cout << "Username not found." << endl; // Displaying error message if username not found
+	}
+
+	//return 0;
 }
 
 
